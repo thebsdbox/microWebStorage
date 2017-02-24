@@ -28,9 +28,6 @@
 #include <stddef.h>
 #include "mwsHTTPD.h"
 
-//#include "oneview.h"
-//#include "oneviewHTTPD.h"
-
 // Function Prototypes
 int receive(int socket);
 
@@ -334,11 +331,10 @@ void sendHTML(char *statusCode, char *contentType, char *content, int size, int 
 
 int handleHttpGET(char *input)
 {
+    sendString("<html>Hello World</html>\n", connecting_socket);
     sendHeader("200 OK", "application/json",0, connecting_socket);
     return -1;
 }
-
-
 
 int respond()
 {

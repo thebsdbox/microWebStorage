@@ -13,7 +13,7 @@
 #include "mwsHTTPD.h"
 
 int main(int argc, const char * argv[]) {
-    printf("microWebServer Starting...\n");
+    printf("microWebStorage Starting...\n");
     
     // Set a port to bind to
     setPort(8888);
