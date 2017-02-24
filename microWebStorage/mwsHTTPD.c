@@ -20,6 +20,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
+#include <signal.h>
 
 #include <time.h>
 #include <sys/wait.h>
@@ -488,10 +489,26 @@ int receive(int socket)
 }
 
 /*****************************************************************************/
+void handleInterrupt(int s){
+    //printf("Caught signal %d\n",(int)s);
+    printf("Exiting microWebStorage\n");
+    close(current_socket);
+}
 
+void setInterruptHandler()
+{
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = handleInterrupt;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+    
+}
 
 void startListenLoop()
 {
+    // Enable the interupt handler, so that a ctrl-c will tidy up the socket
+    setInterruptHandler();
     while (1) {
         acceptConnection();
     }
