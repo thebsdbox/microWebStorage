@@ -45,8 +45,7 @@ socklen_t addr_size;
 
 httpResponse *response;
 
-char *(*postCallback)(httpRequest *);
-
+char *postData;
 
 /*****************************************************************/
 /*                       Functions Start                         */
@@ -81,21 +80,6 @@ void setPort(size_t port)
 {
         tcpPort = port;
 }
-
-
-/*  Call back functions, allow the http server to send the raw text back to other libraries or code to process
- *
- */
-
-void SetPostFunction( char *(*postCallbackFunction)(httpRequest *))
-{
-    postCallback = postCallbackFunction;
-}
-
-/* These functions will handle the steps of creating a socket, it can
- * either be a UNIX Socket or an INET socket. The INET Socket will sit on
- * a IP Stack, the UNIX Socket will allow Interprocess communiation
- */
 
 void createINETSocket()
 {
@@ -332,8 +316,14 @@ void sendHTML(char *statusCode, char *contentType, char *content, int size, int 
 
 int handleHttpGET(char *input)
 {
-    sendString("<html>Hello World</html>\n", connecting_socket);
-    sendHeader("200 OK", "application/json",0, connecting_socket);
+    if (postData) {
+    //setHTTPResponse(, <#int responseCode#>)
+
+    } else {
+        sendHeader("200 OK", "application/json",0, connecting_socket);
+
+        sendString("<html>Not Storing Data</html>\n", connecting_socket);
+    }
     return -1;
 }
 
@@ -404,7 +394,11 @@ int receive(int socket)
     
     if ( stringMatch("GET", request->method) )				// GET
     {
-        handleHttpGET(buffer);
+        //handleHttpGET(buffer);
+        if (postData) {
+            setHTTPResponse(postData, 200);
+            respond();
+        }
     }
     else if ( stringMatch("HEAD", request->method) )		// HEAD
     {
@@ -457,29 +451,19 @@ int receive(int socket)
             // Only wipe over the messageBody if we've had the expect header
             request->messageBody = buffer;
         }
-        
-        /* Check that callback function has been set,
-         * if it has then pass the messageBody to be processed
-         * if not error out
-         */
-        
-        if (postCallback) {
+
+    /* Allocate required memory for reponse
+    * post the data as a callback to a handling function
+    * respond accordingly to the client
+    */
             
-            /* Allocate required memory for reponse
-             * post the data as a callback to a handling function
-             * respond accordingly to the client
-             */
-            
-            response = malloc(sizeof(httpResponse));
-            postCallback(request);
-            respond();
-            return 1;
-        } else {
-            // WARN, coding is incorrect
-            sendString("HTTP/1.0 500 Error\r\n\r\n", connecting_socket);
-            return 1;
-        }
-        
+        response = malloc(sizeof(httpResponse));
+        postData = strdup(request->messageBody);
+        //postCallback(request);
+        respond();
+        // MEMORY LEAK HERE
+        free(response);
+        return 1;
     }
     else	 // Not a handled HTTPD request (GET/POST)
     {
@@ -491,7 +475,7 @@ int receive(int socket)
 /*****************************************************************************/
 void handleInterrupt(int s){
     //printf("Caught signal %d\n",(int)s);
-    printf("Exiting microWebStorage\n");
+    printf("\nExiting microWebStorage\n");
     close(current_socket);
 }
 
