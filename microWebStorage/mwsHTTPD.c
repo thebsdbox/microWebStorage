@@ -36,8 +36,6 @@ int receive(int socket);
 
 
 size_t tcpPort;
-char *socket_path;
-
 
 FILE *filePointer = NULL;
 
@@ -81,15 +79,6 @@ int stringMatch(const char *string1, const char *string2)
     return 0;
 }
 
-int setSocketPath(char *path)
-{
-    if (path) {
-        socket_path = path;
-        return EXIT_SUCCESS;
-    }
-    return EXIT_FAILURE;
-}
-
 void setPort(size_t port)
 {
         tcpPort = port;
@@ -116,41 +105,6 @@ void createINETSocket()
     if ( current_socket == -1 )
     {
         perror("Create socket");
-        exit(-1);
-    }
-}
-
-void createUNIXSocket()
-{
-    if ( (current_socket = socket(AF_UNIX, SOCK_STREAM, 0)) == -1) {
-        perror("socket error");
-        exit(-1);
-    }
-}
-
-void bindToUNIXSocket()
-{
-    if (!socket_path)  {
-        printf("Error setting Socket Path\n");
-        exit(-1);
-    }
-    
-    struct sockaddr_un addr;
-    
-    memset(&addr, 0, sizeof(addr));
-    
-    addr.sun_family = AF_UNIX;
-    
-    if (*socket_path == '\0') {
-        *addr.sun_path = '\0';
-        strncpy(addr.sun_path+1, socket_path+1, sizeof(addr.sun_path)-2);
-    } else {
-        strncpy(addr.sun_path, socket_path, sizeof(addr.sun_path)-1);
-        unlink(socket_path);
-    }
-    
-    if (bind(current_socket, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
-        perror("bind error");
         exit(-1);
     }
 }
@@ -540,31 +494,9 @@ int receive(int socket)
 /*****************************************************************************/
 
 
-
-
-
-
-void start_socket()
+void startListenLoop()
 {
-    createUNIXSocket();
-    bindToUNIXSocket();
-    startListener();
-    
     while (1) {
         acceptConnection();
     }
-    
-}
-
-void start_tcp()
-{
-    setPort(8888);
-    createINETSocket();
-    bindToINETSocketWithPort();
-    startListener();
-    
-    while (1) {
-        acceptConnection();
-    }
-    
 }

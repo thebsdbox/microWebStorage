@@ -13,11 +13,6 @@
 #include <stddef.h>
 
 typedef struct {
-    char *socketPath;       // Path to UNIX Socket to pind to
-    int port;               // Port to bind server to
-} serverConfiguration;
-
-typedef struct {
     // RFC requestLine
     char *method;
     char *URI;
@@ -49,13 +44,16 @@ typedef struct {
 //#define OV_HTTPD_POST 3
 
 
-void start_socket();
-void start_tcp();
+void startListenLoop();
+
 
 httpRequest *processHttpRequest(char *rawData);
-int setSocketPath(char *path);
+void setPort(size_t port);
 int setHTTPResponse(char *messageBody, int responseCode);
 
+void createINETSocket();
+void bindToINETSocketWithPort();
+void startListener();
 
 #ifndef HTTPDCALLBACK_H
 #define HTTPDCALLBACK_H

@@ -14,6 +14,16 @@
 
 int main(int argc, const char * argv[]) {
     printf("microWebServer Starting...\n");
-    start_tcp();
+    
+    // Set a port to bind to
+    setPort(8888);
+    // create a socket
+    createINETSocket();
+    // bind to that socket
+    bindToINETSocketWithPort();
+    // start listening on that socket
+    startListener();
+    // create listening loop to process incoming packets
+    startListenLoop();
     return 0;
 }
