@@ -10,20 +10,37 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "mwsHTTPD.h"
 
 int main(int argc, const char * argv[]) {
     printf("microWebStorage Starting...\n");
     
-    // Set a port to bind to
-    setPort(8888);
-    // create a socket
-    createINETSocket();
-    // bind to that socket
-    bindToINETSocketWithPort();
-    // start listening on that socket
-    startListener();
-    // create listening loop to process incoming packets
-    startListenLoop();
+    char *tcpPort = getenv("mwsPort");
+    char *contentType = getenv("mwsContentType");
+    if (tcpPort) {
+        // Set a port to bind to
+        size_t port = atoi(tcpPort);
+        setPort(port);
+        
+        if (contentType) {
+            setContentType(contentType);
+        }
+        // create a socket
+        createINETSocket();
+        // bind to that socket
+        bindToINETSocketWithPort();
+        // start listening on that socket
+        startListener();
+        // create listening loop to process incoming packets
+        startListenLoop();
+        return 0;
+    } else {
+        printf("[Error] Please set environment varialbe mwsPort\n");
+        printf("microWebStorage Exiting...\n");
+
+        return -1;
+    }
+    
     return 0;
 }

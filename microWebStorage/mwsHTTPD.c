@@ -32,10 +32,8 @@
 // Function Prototypes
 int receive(int socket);
 
-
 size_t tcpPort;
-
-FILE *filePointer = NULL;
+char *contentType;
 
 struct sockaddr_in address;
 struct sockaddr_storage connector;
@@ -79,6 +77,13 @@ int stringMatch(const char *string1, const char *string2)
 void setPort(size_t port)
 {
         tcpPort = port;
+}
+
+void setContentType(char *type)
+{
+    if (type) {
+        contentType = type;
+    }
 }
 
 void createINETSocket()
@@ -259,6 +264,10 @@ size_t sendBinary(int *byte, int length)
 
 void sendHeader(char *Status_code, char *Content_Type, size_t TotalSize, int socket)
 {
+    // If no content type is set then just do a catch all
+    if (!Content_Type) {
+        Content_Type = "*/*";
+    }
     char *head = "HTTP/1.1 ";
     char *content_head = "\r\nContent-Type: ";
     char *server_head = "\r\nServer: microWebServer";
@@ -319,7 +328,7 @@ int handleHttpGET(char *input)
     if (postData) {
 
     } else {
-        sendHeader("200 OK", "application/json",0, connecting_socket);
+        sendHeader("200 OK", contentType,0, connecting_socket);
 
         sendString("<html>Not Storing Data</html>\n", connecting_socket);
     }
@@ -337,19 +346,19 @@ int respond()
     if (response) {
         switch (response->responseCode) {
             case 200:
-                sendHeader("200 OK", "application/json", response->messageLength, connecting_socket);
+                sendHeader("200 OK", contentType, response->messageLength, connecting_socket);
                 break;
             case 202:
-                sendHeader("202 Accepted", "application/json", response->messageLength, connecting_socket);
+                sendHeader("202 Accepted", contentType, response->messageLength, connecting_socket);
                 break;
             case 204:
-                sendHeader("204 No Response", "application/json", response->messageLength, connecting_socket);
+                sendHeader("204 No Response", contentType, response->messageLength, connecting_socket);
                 break;
             case 405:
-                sendHeader("405 Method Not Allowed", "application/json", response->messageLength, connecting_socket);
+                sendHeader("405 Method Not Allowed", contentType, response->messageLength, connecting_socket);
                 break;
             case 415:
-                sendHeader("415 Unsupported Media Type", "application/json", response->messageLength, connecting_socket);
+                sendHeader("415 Unsupported Media Type", contentType, response->messageLength, connecting_socket);
                 break;
             default:
                 sendString("HTTP/1.1 500 Error\r\n\r\n", connecting_socket);
@@ -394,7 +403,7 @@ int receive(int socket)
     if ( stringMatch("GET", request->method) )				// GET
     {
         if (postData) {
-            sendHeader("200 OK", "application/json", strlen(postData), connecting_socket);
+            sendHeader("200 OK", contentType, strlen(postData), connecting_socket);
             sendString(postData, connecting_socket);
         }
     }

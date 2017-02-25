@@ -49,6 +49,8 @@ void startListenLoop();
 
 httpRequest *processHttpRequest(char *rawData);
 void setPort(size_t port);
+void setContentType(char *type);
+
 int setHTTPResponse(char *messageBody, int responseCode);
 
 void createINETSocket();
