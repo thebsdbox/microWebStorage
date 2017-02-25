@@ -460,7 +460,6 @@ int receive(int socket)
         }
         response = malloc(sizeof(httpResponse));
         postData = strdup(request->messageBody);
-        //postCallback(request);
         setHTTPResponse("", 200);
         respond();
         return 1;
