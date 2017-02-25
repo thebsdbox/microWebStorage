@@ -4,7 +4,12 @@ CC = gcc
 # compiler flags:
 #  -g    adds debugging information to the executable file
 #  -Wall turns on most, but not all, compiler warnings
-CFLAGS  = -g -Wall
+
+# STATIC
+# CFLAGS  = -s -Os -Wl,--discard-all -Wl,-O1 -Wall -static 
+
+# DYNAMIC
+CFLAGS  = -s -Os -Wl,--discard-all -Wl,-O1 -Wall
 
 # the build target executable:
 TARGET = microWebStorage
@@ -12,7 +17,7 @@ TARGET = microWebStorage
 all: $(TARGET)
 
 $(TARGET): main.c
-	$(CC) $(CFLAGS) -o $(TARGET) main.c mwsHTTPD.c
+        $(CC) $(CFLAGS) -o $(TARGET) main.c mwsHTTPD.c
 
 clean:
-	$(RM) $(TARGET)
+        $(RM) $(TARGET)
