@@ -317,7 +317,6 @@ void sendHTML(char *statusCode, char *contentType, char *content, int size, int 
 int handleHttpGET(char *input)
 {
     if (postData) {
-    //setHTTPResponse(, <#int responseCode#>)
 
     } else {
         sendHeader("200 OK", "application/json",0, connecting_socket);
@@ -394,10 +393,9 @@ int receive(int socket)
     
     if ( stringMatch("GET", request->method) )				// GET
     {
-        //handleHttpGET(buffer);
         if (postData) {
-            setHTTPResponse(postData, 200);
-            respond();
+            sendHeader("200 OK", "application/json", strlen(postData), connecting_socket);
+            sendString(postData, connecting_socket);
         }
     }
     else if ( stringMatch("HEAD", request->method) )		// HEAD
@@ -456,13 +454,15 @@ int receive(int socket)
     * post the data as a callback to a handling function
     * respond accordingly to the client
     */
+        if (postData) {
             
+            free(postData);
+        }
         response = malloc(sizeof(httpResponse));
         postData = strdup(request->messageBody);
         //postCallback(request);
+        setHTTPResponse("", 200);
         respond();
-        // MEMORY LEAK HERE
-        free(response);
         return 1;
     }
     else	 // Not a handled HTTPD request (GET/POST)
